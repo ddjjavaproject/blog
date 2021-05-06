@@ -70,15 +70,16 @@
     app = new Vue({
         el: "#app",
         data: {
-            blockList: [],
+            blogList: [],
             keyword: '',
             duration: ''
         },
-        method: {
+        methods: {
             getBlogs:function () {
                 var that = this;
                 axios.get("http://localhost:8080/data/list",{}).then(function (response) {
-                    that.blockList = response.data;
+                    debugger
+                    that.blogList = response.data;
                 });
             },
             searchWithMysql:function () {
@@ -88,7 +89,7 @@
                     'keyword': that.keyword
                 };
                 axios.post("http://localhost:8080/data/search",param).then(function (response) {
-                    that.blockList = response.data.list;
+                    that.blogList = response.data.list;
                     that.duration = response.data.duration;
                 });
             },
@@ -99,7 +100,7 @@
                     'keyword': that.keyword
                 };
                 axios.post("http://localhost:8080/data/search",param).then(function (response) {
-                    that.blockList = response.data.list;
+                    that.blogList = response.data.list;
                     that.duration = response.data.duration;
                 });
             }

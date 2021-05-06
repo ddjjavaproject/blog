@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>登录</title>
+		<link rel="stylesheet" href="./css/login.css">
+		<script src="/js/jquery.min.js"></script>
+		<script src="/js/customerpackage.js"></script>
+	</head>
+	<body>
+		<div class="top">滴滴滴&nbsp;·&nbsp;</div>
+		<div class="content" id="app">
+			<form action="" method="post" class="layui-form">
+				<div class="login">
+					<div class="title">后台管理系统</div>
+					<div class="line">
+						<img class="smallImg" src="./img/account.png">
+						<input placeholder="请输入账号" name="name" required type="text" class="form-control">
+					</div>
+					<div class="line">
+						<img class="smallImg" src="./img/password.png">
+						<input placeholder="请输入密码" name="pwd" required type="password" class="form-control">
+					</div>
+					<button type="button" lay-submit="" lay-filter="login" class="logBut">登&nbsp;&nbsp;录</button>
+				</div>
+			</form>
+		</div>
+	</body>
+	<script src="/layui-2.4.2/layui/layui.js"></script>
+	<script>
+		layui.use(['layer', 'form'], function() {
+			var layer = layui.layer,$ = layui.$, form = layui.form;
+			form.on('submit(login)',function(data){
+				var res = commonAjax('/user/login','post',JSON.stringify(data.field),'json',false);
+				if(res > 0){
+					location.href = '/admin';
+				}else{
+					$("input[name='pwd']").val('');
+				}
+			});
+		});
+	</script>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>添加和编辑</title>
+    <link rel="stylesheet" href="/layui-2.4.2/layui/css/layui.css" media="all">
+    <style>
+        body{margin: 10px;}
+        .demo-carousel{height: 200px; line-height: 200px; text-align: center;}
+    </style>
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/customerpackage.js"></script>
+</head>
+<body>
+
+<form class="layui-form" action="">
+    <div class="layui-form-item">
+        <label class="layui-form-label">名称</label>
+        <div class="layui-input-block">
+            <input type="text" name="name" th:value="${mFunction.name}" lay-verify="required" lay-reqtext="名称是必填项，岂能为空？" placeholder="请输入" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">地址</label>
+        <div class="layui-input-block">
+            <input type="text" name="url" th:value="${mFunction.url}" placeholder="请输入" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+
+    <div class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">父节点</label>
+            <div class="layui-input-block">
+                <input type="text" name="parentName" th:value="${name}" placeholder="请输入标题" readonly="" autocomplete="off" class="layui-input">
+                <input type="hidden" value="0" th:value="${mFunction.parentId}?${mFunction.parentId}:0" name="parentId" autocomplete="off" class="layui-input">
+                <div class="eleTree ele5" lay-filter="data5"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">是否作为菜单显示</label>
+        <div class="layui-input-block" th:if="${mFunction.isMenu} eq 1">
+            <input type="radio" name="isMenu" value="1" title="是" checked="">
+            <input type="radio" name="isMenu" value="0" title="否">
+        </div>
+        <div class="layui-input-block" th:if="${mFunction.isMenu} eq 0">
+            <input type="radio" name="isMenu" value="1" title="是">
+            <input type="radio" name="isMenu" value="0" title="否" checked="">
+        </div>
+        <div class="layui-input-block" th:if="${mFunction.isMenu} eq null">
+            <input type="radio" name="isMenu" value="1" title="是">
+            <input type="radio" name="isMenu" value="0" title="否">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">序号</label>
+        <div class="layui-input-block">
+            <input type="number" name="sortnum" th:value="${mFunction.sortnum}" placeholder="请输入" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button type="submit" class="layui-btn" lay-submit="" lay-filter="_function">立即提交</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </div>
+</form>
+<script src="/layui-2.4.2/layui/layui.js"></script>
+<script>
+    layui.config({
+        base: '/layui-2.4.2/layui/lay/modules/'
+    }).extend({
+     eleTree: 'eleTree/eleTree'
+    }).use(['layer', 'form', 'eleTree'], function(){
+        var layer = layui.layer,form = layui.form,eleTree = layui.eleTree;
+        var $ = layui.$;
+        form.verify({
+            name: function(value){
+                if(value.length < 5){
+                    return '名称至少得5个字符啊';
+                }
+            },
+        });
+        function getData(){
+            var data = [];
+            $.ajax({
+                url: "/function/treeList",    //后台数据请求地址
+                type: "get",
+                async:false,
+                success: function(result){
+                    data = result;
+                }
+            });
+            return data;
+        }
+        var el5 = eleTree.render({
+            elem: '.ele5',
+            data: getData(),
+            defaultExpandAll: true,
+            expandOnClickNode: false,
+            highlightCurrent: true,
+            request: {
+                name: "name",
+                key: "id",
+                children: "children",
+                checked: "checked",
+                isOpen: "isOpen",
+                isLeaf: "isLeaf",
+                pid: "parentId"
+            }
+        });
+        $("[name='parentName']").on("click",function (e) {
+            e.stopPropagation();
+            if(!el5){
+                el5 = eleTree.render({
+                    elem: '.ele5',
+                    data: getData(),
+                    defaultExpandAll: true,
+                    expandOnClickNode: false,
+                    highlightCurrent: true,
+                    request: {
+                        name: "name",
+                        key: "id",
+                        children: "children",
+                        checked: "checked",
+                        isOpen: "isOpen",
+                        isLeaf: "isLeaf",
+                        pid: "parentId"
+                    }
+                });
+            }
+            $(".ele5").toggle();
+        })
+        eleTree.on("nodeClick(data5)",function(d) {
+            $("[name='parentId']").val(d.data.currentData.id)
+            $("[name='parentName']").val(d.data.currentData.name)
+            $(".ele5").hide();
+        })
+        $(".ele5").toggle();
+        form.on('submit(_function)', function(data){
+            var resStatus = commonAjax("/function/addEdit", 'post', JSON.stringify(data.field), 'json', false);
+            if(resStatus > 0){
+                $("#submit").attr("disabled", true);
+                layer.alert("添加成功", {icon:6}, function(){
+                    window.parent.location.reload();
+                    var index = parent.layer.getFrameIndex(name);
+                    parent.layer.close(index);
+                })
+            }
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

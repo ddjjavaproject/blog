@@ -1535,7 +1535,7 @@
     normalizeInject(child, vm);
     normalizeDirectives(child);
 
-    // Apply extends and mixins on the child options,
+    // Apply extend and mixins on the child options,
     // but only if it is a raw options object that isn't
     // the result of another mergeOptions call.
     // Only merged options has the _base property.
@@ -11462,7 +11462,7 @@
   var prohibitedKeywordRE = new RegExp('\\b' + (
     'do,if,for,let,new,try,var,case,else,with,await,break,catch,class,const,' +
     'super,throw,while,yield,delete,export,import,return,switch,default,' +
-    'extends,finally,continue,debugger,function,arguments'
+    'extend,finally,continue,debugger,function,arguments'
   ).split(',').join('\\b|\\b') + '\\b');
 
   // these unary operators should not be used as property/method names

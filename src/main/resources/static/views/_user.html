@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>添加和编辑</title>
+    <link rel="stylesheet" href="/layui-2.4.2/layui/css/layui.css" media="all">
+    <style>
+        body{margin: 10px;}
+    </style>
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/customerpackage.js"></script>
+</head>
+<body>
+
+<form class="layui-form" action="">
+    <div class="layui-form-item">
+        <label class="layui-form-label">名称</label>
+        <div class="layui-input-block">
+            <input type="hidden" name="id" th:value="${mUser.id}" class="layui-input"/>
+            <input type="text" name="name" th:value="${mUser.name}" lay-verify="required" lay-reqtext="名称是必填项，岂能为空？" placeholder="请输入用户名" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">密码</label>
+        <div class="layui-input-block">
+            <input type="password" name="pwd" th:value="${mUser.pwd}" placeholder="请输入密码" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">角色</label>
+        <div class="layui-input-block">
+            <div th:each="role:${roleList}" class="layui-unselect layui-input-inline">
+                <input type="checkbox" name="roleId" th:title="${role.name}" th:value="${role.id}" autocomplete="off" class="layui-input">
+                <span th:text="${role.name}"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button type="submit" class="layui-btn" lay-submit="" lay-filter="_user">立即提交</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </div>
+</form>
+<script src="/layui-2.4.2/layui/layui.js"></script>
+<script>
+    layui.config({
+        base: '/layui-2.4.2/layui/lay/modules/'
+    }).use(['layer', 'form'], function(){
+        var layer = layui.layer,form = layui.form;
+        var $ = layui.$;
+        form.verify({
+            name: function(value){
+                if(value.length < 5){
+                    return '名称至少得5个字符啊';
+                }
+            }
+        });
+        form.on('submit(_user)', function(data){
+            var check_val = [];
+            $("input[name='roleId']:checked").each(function(){
+                check_val.push($(this).val());
+            });
+            data.field.roleId = check_val;
+            var resStatus = commonAjax("/user/addEdit", 'post', JSON.stringify(data.field), 'json', false);
+            if(resStatus > 0){
+                $("#submit").attr("disabled", true);
+                var id = $("input[name='id']").val();
+                var msg = '添加成功';
+                if(id > 0){
+                    msg = '修改成功';
+                }
+                layer.alert(msg, {icon:6}, function(){
+                    window.parent.location.reload();
+                    var index = parent.layer.getFrameIndex(name);
+                    parent.layer.close(index);
+                })
+            }
+            return false;
+        });
+    });
+</script>
+</body>
+</html>
